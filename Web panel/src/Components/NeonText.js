@@ -25,9 +25,11 @@ const neonTXT = styled.h1`
     color: #fff;
     font-family: 'monotonregular';
     font-size: 3.5rem;
-    animation: neon 1.5s ease-in-out infinite alternate;
+    
+    text-shadow: 0 0 20px #00fff5; 
     @media only screen and (min-width: 1024px) {       
         font-size: 5.5em;
+        animation: neon 1.5s ease-in-out infinite alternate;
     }
 
     @keyframes neon {
