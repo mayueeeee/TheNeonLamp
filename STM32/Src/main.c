@@ -40,8 +40,8 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "et_stm32f_arm_kit_lcd.h"
-#include <string.h>
-
+#include <string.h> 
+#include <stdlib.h>
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
 
@@ -76,7 +76,17 @@ void LCD_DrawFullCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+int yay[5];
+void pushToUART(int r,int g,int b,int state, int random){
+	char send_data[20];
+	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,state,random);
+	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+}
+void pushColorToUART(int r,int g,int b){
+	char send_data[20];
+	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,yay[3],yay[4]);
+	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+}
 /* USER CODE END 0 */
 
 int main(void)
@@ -84,6 +94,10 @@ int main(void)
 	uint16_t posX, posY;
 	char pos[50];
 	int check = 1;
+	char str[20];
+	char outBuffer[100];
+	char* ptr[5];
+	int yay[5];
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -267,31 +281,37 @@ int main(void)
 			LCD_DrawFullCircle(132, 292, 24);
 			LCD_SetBackColor(0xff47);
 			LCD_DrawFullCircle(132, 292, 24);
+			pushColorToUART(255,235,59);
 		}else if(posX >= 214 && posX <= 262 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 240, 24);
 			LCD_SetBackColor(0xfe00);
 			LCD_DrawFullCircle(132, 240, 24);
+			pushColorToUART(255,193,7);
 		}else if(posX >= 162 && posX <= 210 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 188, 24);
 			LCD_SetBackColor(0xfcc0);
 			LCD_DrawFullCircle(132, 188, 24);
+			pushColorToUART(255,152,0);
 		}else if(posX >= 110 && posX <= 158 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 136, 24);
 			LCD_SetBackColor(0xfaa4);
 			LCD_DrawFullCircle(132, 136, 24);
+			pushColorToUART(255,87,34);
 		}else if(posX >= 58 && posX <= 106 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 84, 24);
 			LCD_SetBackColor(0x7aa9);
 			LCD_DrawFullCircle(132, 84, 24);
+			pushColorToUART(121,85,72);
 		}else if(posX >= 4 && posX <= 52 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 32, 24);
 			LCD_SetBackColor(0x63f1);
 			LCD_DrawFullCircle(132, 32, 24);
+			pushColorToUART(96,125,139);
 		}
 		
 		LCD_SetTextColor(Green);
