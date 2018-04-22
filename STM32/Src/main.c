@@ -298,6 +298,33 @@ int main(void)
 		LCD_DisplayStringLine(Line7, "xxxxxTurnON/OFFxxxxx");
 		LCD_SetTextColor(Yellow);
 		LCD_DisplayStringLine(Line8, "xxxxxxxRAINBOWxxxxxx");
+		
+		
+		while(__HAL_UART_GET_FLAG(&huart3,UART_FLAG_RXNE)==RESET){}
+		HAL_UART_Receive(&huart3, (uint8_t*) &str, 19, 10);		
+		/*String to array*/
+		str[strlen(str) - 1] = '\0'; 
+		 ptr[0] = strtok(&str[1], ","); 
+		 if (ptr[0] != NULL) { 
+			int i = 1; 
+			while (ptr[i - 1] != NULL) { 
+			 ptr[i] = strtok(NULL, ","); 
+			 i++; 
+			} 
+		 } 
+		 
+		for (int i = 0; i < 5; i++) { 
+			yay[i] = atoi(ptr[i]);
+		} 
+		 sprintf(outBuffer,"R:%d G:%d B:%d St:%d Rb:%d\n\r",yay[0],yay[1],yay[2],yay[3],yay[4]);
+		 
+		HAL_UART_Transmit(&huart2,(uint8_t *) outBuffer,strlen(outBuffer),100);
+		//HAL_Delay(300);
+			
+			
+			
+		
+		
 	
   /* USER CODE END WHILE */
 
