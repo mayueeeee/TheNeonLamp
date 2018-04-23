@@ -36,13 +36,27 @@
 #include "stm32f1xx_it.h"
 
 /* USER CODE BEGIN 0 */
+#include "string.h"
 
+#define PWM_HIGH_WIDTH		17					// Duty cycle of pwm signal for a logical 1 to be read by the ws2812 chip. Duty cycle = PWM_HIGH_WIDTH/TIM_PERIOD*100
+#define PWM_LOW_WIDTH		9					// Duty cycle of pwm signal for a logical 0 to be read by the ws2812 chip. Duty cycle = PWM_LOW_WIDTH/TIM_PERIOD*100
+
+
+#define LED_COUNT		64
+#define LED_BUFFER_SIZE		24*LED_COUNT+84		// Buffer size needs to be the number of LEDs times 24 bits plus 42 trailing bit to signify the end of the data being transmitted.
+extern uint16_t tact_sw[64];
+extern uint16_t led_buffer[LED_BUFFER_SIZE];
+uint8_t row=0;
+//int rgbColour[6][3]={{255,0,0},{255,0,255},{0,0,255},{0,255,255},{0,255,0},{255,255,0}};
+extern void rgb(int r,int g,int b);	
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_tim3_ch4_up;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
-
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -186,6 +200,20 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+* @brief This function handles DMA1 channel3 global interrupt.
+*/
+void DMA1_Channel3_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_tim3_ch4_up);
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 1 */
+}
+
+/**
 * @brief This function handles TIM1 update interrupt.
 */
 void TIM1_UP_IRQHandler(void)
@@ -195,7 +223,34 @@ void TIM1_UP_IRQHandler(void)
   /* USER CODE END TIM1_UP_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_UP_IRQn 1 */
-
+uint8_t temp[3]={0x00,0x00,0x00}; //Ordered in G R B
+	int16_t buffindex = 0;
+	for(int8_t i=64;i>0;i--){
+		
+				temp[0] = tact_sw[0]; 
+				temp[1] = tact_sw[1];  
+				temp[2] = tact_sw[2];  
+					
+			for(int8_t j = 0 ; j<3 ; j++) {//loop r g b  colour			
+					for(int8_t k = 0 ; k<8 ; k++){							
+						if(temp[j]&0x80){						
+							led_buffer[buffindex++] = PWM_HIGH_WIDTH;
+						}
+						else{						
+							led_buffer[buffindex++] = PWM_LOW_WIDTH;
+						}								
+						
+						temp[j] = temp[j]<<1;
+				}
+					
+			}
+	
+		}
+	
+	
+	for(int8_t i=0;i<84;i++)
+			led_buffer[buffindex++] = 0;
+	
   /* USER CODE END TIM1_UP_IRQn 1 */
 }
 

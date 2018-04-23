@@ -39,10 +39,21 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
-#include "et_stm32f_arm_kit_lcd.h"
-#include <string.h> 
-#include <stdlib.h>
+
 /* USER CODE BEGIN Includes */
+#include "main.h"
+#include "stm32f1xx_hal.h"
+#include "et_stm32f_arm_kit_lcd.h"
+#include <string.h>
+
+#define LED_COUNT		64
+#define LED_BUFFER_SIZE		24*64+	84		// Buffer size needs to be the number of LEDs times 24 bits plus 42 trailing bit to signify the end of the data being transmitted.
+uint16_t led_buffer[LED_BUFFER_SIZE] = {0};
+uint16_t tact_sw[64]={0};
+
+#define PWM_HIGH_WIDTH		17					// Duty cycle of pwm signal for a logical 1 to be read by the ws2812 chip. Duty cycle = PWM_HIGH_WIDTH/TIM_PERIOD*100
+#define PWM_LOW_WIDTH		9					// Duty cycle of pwm signal for a logical 0 to be read by the ws2812 chip. Duty cycle = PWM_LOW_WIDTH/TIM_PERIOD*100
+	
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -50,6 +61,9 @@ SPI_HandleTypeDef hspi3;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
+DMA_HandleTypeDef hdma_tim3_ch4_up;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -63,43 +77,40 @@ UART_HandleTypeDef huart3;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART3_UART_Init(void);
-void LCD_DrawFullCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
+static void MX_TIM4_Init(void);
+static void MX_TIM3_Init(void);
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+                                
+
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-int yay[5];
-void pushToUART(int r,int g,int b,int state, int random){
-	char send_data[20];
-	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,state,random);
-	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
-}
-void pushColorToUART(int r,int g,int b){
-	char send_data[20];
-	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,yay[3],yay[4]);
-	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+void rgb(int r,int g,int b)
+{
+tact_sw[0]=g; //G Channel
+tact_sw[1]=r; //R Channel
+tact_sw[2]=b; //B Channel	
 }
 /* USER CODE END 0 */
 
 int main(void)
 {
-	uint16_t posX, posY;
+
+  /* USER CODE BEGIN 1 */
+uint16_t posX, posY;
 	char pos[50];
 	int check = 1;
-	char str[20];
-	char outBuffer[100];
-	char* ptr[5];
-	int yay[5];
-  /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -120,12 +131,15 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI3_Init();
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_USART3_UART_Init();
+  MX_TIM4_Init();
+  MX_TIM3_Init();
 
   /* USER CODE BEGIN 2 */
 
@@ -189,6 +203,19 @@ int main(void)
 	LCD_SetBackColor(0x63f1);
 	LCD_DrawFullCircle(132, 32, 24);
 	
+	
+	
+	HAL_TIM_Base_Start_IT (&htim4);
+	
+	
+	HAL_TIM_Base_Start_IT (&htim1);//count
+	
+
+
+		
+		
+		
+	HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_4, (uint32_t*) led_buffer, LED_BUFFER_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -207,31 +234,43 @@ int main(void)
 			LCD_DrawFullCircle(28, 292, 24);
 			LCD_SetBackColor(0xf206);
 			LCD_DrawFullCircle(28, 292, 24);
+			rgb(244, 67, 54);
 		}else if(posX >= 214 && posX <= 262 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 240, 24);
 			LCD_SetBackColor(0xe8ec);
 			LCD_DrawFullCircle(28, 240, 24);
+			rgb(233, 30, 99);
+
 		}else if(posX >= 162 && posX <= 210 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 188, 24);
 			LCD_SetBackColor(0x9936);
 			LCD_DrawFullCircle(28, 188, 24);
+			rgb(156, 39, 176);
+			
 		}else if(posX >= 110 && posX <= 158 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 136, 24);
 			LCD_SetBackColor(0x61d6);
 			LCD_DrawFullCircle(28, 136, 24);
+			rgb(103, 58, 183);
+			
 		}else if(posX >= 58 && posX <= 106 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 84, 24);
 			LCD_SetBackColor(0x3a96);
 			LCD_DrawFullCircle(28, 84, 24);
+			rgb(63, 81, 181);
+
+			
 		}else if(posX >= 4 && posX <= 52 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 32, 24);
 			LCD_SetBackColor(0x24be);
 			LCD_DrawFullCircle(28, 32, 24);
+			rgb(33, 150, 243);
+			
 		}
 		
 		//check touchscreen row 2
@@ -244,31 +283,43 @@ int main(void)
 			LCD_DrawFullCircle(80, 292, 24);
 			LCD_SetBackColor(0x055e);
 			LCD_DrawFullCircle(80, 292, 24);
+			rgb(3, 169, 244);
+			
 		}else if(posX >= 214 && posX <= 262 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 240, 24);
 			LCD_SetBackColor(0x05fa);
 			LCD_DrawFullCircle(80, 240, 24);
+			rgb(0, 188, 212);
+			
 		}else if(posX >= 162 && posX <= 210 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 188, 24);
 			LCD_SetBackColor(0x04b1);
 			LCD_DrawFullCircle(80, 188, 24);
+			rgb(0, 150, 136);
+			
 		}else if(posX >= 110 && posX <= 158 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 136, 24);
 			LCD_SetBackColor(0x4d6a);
 			LCD_DrawFullCircle(80, 136, 24);
+			rgb(76, 175, 80);
+			
 		}else if(posX >= 58 && posX <= 106 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 84, 24);
 			LCD_SetBackColor(0x8e09);
 			LCD_DrawFullCircle(80, 84, 24);
+			rgb(139, 195, 74);
+			
 		}else if(posX >= 4 && posX <= 52 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 32, 24);
 			LCD_SetBackColor(0xcee7);
 			LCD_DrawFullCircle(80, 32, 24);
+			rgb(205, 220, 57);
+			
 		}
 		
 		posX = TCS_Read_X();
@@ -281,70 +332,49 @@ int main(void)
 			LCD_DrawFullCircle(132, 292, 24);
 			LCD_SetBackColor(0xff47);
 			LCD_DrawFullCircle(132, 292, 24);
-			pushColorToUART(255,235,59);
+			rgb(255, 235, 59);
+			
 		}else if(posX >= 214 && posX <= 262 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 240, 24);
 			LCD_SetBackColor(0xfe00);
 			LCD_DrawFullCircle(132, 240, 24);
-			pushColorToUART(255,193,7);
+			rgb(255, 193, 7);
+			
 		}else if(posX >= 162 && posX <= 210 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 188, 24);
 			LCD_SetBackColor(0xfcc0);
 			LCD_DrawFullCircle(132, 188, 24);
-			pushColorToUART(255,152,0);
+			rgb(255, 152, 0);
+			
 		}else if(posX >= 110 && posX <= 158 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 136, 24);
 			LCD_SetBackColor(0xfaa4);
 			LCD_DrawFullCircle(132, 136, 24);
-			pushColorToUART(255,87,34);
+			rgb(255, 87, 34);
+			
 		}else if(posX >= 58 && posX <= 106 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 84, 24);
 			LCD_SetBackColor(0x7aa9);
 			LCD_DrawFullCircle(132, 84, 24);
-			pushColorToUART(121,85,72);
+			rgb(121, 85, 72);
+			
 		}else if(posX >= 4 && posX <= 52 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 32, 24);
 			LCD_SetBackColor(0x63f1);
 			LCD_DrawFullCircle(132, 32, 24);
-			pushColorToUART(96,125,139);
+			rgb(96, 125, 139);
+			
 		}
 		
 		LCD_SetTextColor(Green);
 		LCD_DisplayStringLine(Line7, "xxxxxTurnON/OFFxxxxx");
 		LCD_SetTextColor(Yellow);
 		LCD_DisplayStringLine(Line8, "xxxxxxxRAINBOWxxxxxx");
-		
-		
-		while(__HAL_UART_GET_FLAG(&huart3,UART_FLAG_RXNE)==RESET){}
-		HAL_UART_Receive(&huart3, (uint8_t*) &str, 19, 10);		
-		/*String to array*/
-		str[strlen(str) - 1] = '\0'; 
-		 ptr[0] = strtok(&str[1], ","); 
-		 if (ptr[0] != NULL) { 
-			int i = 1; 
-			while (ptr[i - 1] != NULL) { 
-			 ptr[i] = strtok(NULL, ","); 
-			 i++; 
-			} 
-		 } 
-		 
-		for (int i = 0; i < 5; i++) { 
-			yay[i] = atoi(ptr[i]);
-		} 
-		 sprintf(outBuffer,"R:%d G:%d B:%d St:%d Rb:%d\n\r",yay[0],yay[1],yay[2],yay[3],yay[4]);
-		 
-		HAL_UART_Transmit(&huart2,(uint8_t *) outBuffer,strlen(outBuffer),100);
-		//HAL_Delay(300);
-			
-			
-			
-		
-		
 	
   /* USER CODE END WHILE */
 
@@ -352,6 +382,7 @@ int main(void)
 
   }
   /* USER CODE END 3 */
+
 }
 
 /** System Clock Configuration
@@ -501,6 +532,89 @@ static void MX_TIM2_Init(void)
 
 }
 
+/* TIM3 init function */
+static void MX_TIM3_Init(void)
+{
+
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 3-1;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 30-1;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim3);
+
+}
+
+/* TIM4 init function */
+static void MX_TIM4_Init(void)
+{
+
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_MasterConfigTypeDef sMasterConfig;
+
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 72-1;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 1000-1;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
+
 /* USART1 init function */
 static void MX_USART1_UART_Init(void)
 {
@@ -555,6 +669,21 @@ static void MX_USART3_UART_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 7, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 
 }
 
