@@ -71,6 +71,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,22 +96,79 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN 0 */
 
+int yay[5];
+char str[20];
+int light_state=1;
+char* ptr[5];
+int old_color[3]; //{R,G,B}
+
+/*void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	 if (huart==&huart1) {
+       // do something with rx_data
+		 while(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_RXNE)== RESET){}
+		HAL_UART_Receive(&huart1, (uint8_t*) &str, 19, 30);		
+		//HAL_UART_Transmit(&huart2,(uint8_t *) str,19,100);
+		//String to array
+		str[strlen(str) - 1] = '\0'; 
+		 ptr[0] = strtok(&str[1], ","); 
+		 if (ptr[0] != NULL) { 
+			int i = 1; 
+			while (ptr[i - 1] != NULL) { 
+			 ptr[i] = strtok(NULL, ","); 
+			 i++; 
+			} 
+		 } 
+
+      
+
+       HAL_UART_Receive_IT(&huart1, str, 19);   
+    }
+	
+}*/
+
 void rgb(int r,int g,int b)
 {
-tact_sw[0]=g; //G Channel
-tact_sw[1]=r; //R Channel
-tact_sw[2]=b; //B Channel	
+	// Save Old color
+	old_color[0] =  tact_sw[0]; //G Channel
+	old_color[1] =  tact_sw[1]; //R Channel
+	old_color[2] =  tact_sw[2]; //B Channel	
+	
+	tact_sw[0]=g; //G Channel
+	tact_sw[1]=r; //R Channel
+	tact_sw[2]=b; //B Channel	
+	light_state=1;	
+			
+	//HAL_Delay(10);
+	
 }
-int yay[5];
+void doRainbow(){
+	int timeout=4;
+	for(int r=0;r<255;r++){
+		for(int g=r;g>0;g--){
+			for(int b=g;b<255;b++){
+				rgb(r,g,b);
+				//HAL_Delay(timeout);
+			}
+			
+		}
+		
+	}
+}
+
+
+
 void pushToUART(int r,int g,int b,int state, int random){
 	char send_data[20];
-	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,state,random);
-	//HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+	sprintf(send_data,"[%03d,%03d,%03d,%d,%d]\n",r,g,b,state,random);
+	HAL_UART_Transmit(&huart1,(uint8_t *) send_data,strlen(send_data),40);	
 }
 void pushColorToUART(int r,int g,int b){
 	char send_data[20];
-	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,yay[3],yay[4]);
-	//HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+	sprintf(send_data,"[%03d,%03d,%03d,%d,%d]\n",r,g,b,1,yay[4]);
+	HAL_UART_Transmit(&huart1,(uint8_t *) send_data,strlen(send_data),40);	
+	HAL_UART_Transmit(&huart2,(uint8_t *) send_data,strlen(send_data),40);	
+	//HAL_Delay(100);
 }
 
 
@@ -123,10 +181,12 @@ int main(void)
 uint16_t posX, posY;
 	char pos[50];
 	int check = 1;
-		char str[20];
+		
 	char outBuffer[100];
-	char* ptr[5];
+	
 	int yay[5];
+	//HAL_UART_Receive_IT(&huart1, (uint8_t*) &str, 19);
+	
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -414,9 +474,45 @@ uint16_t posX, posY;
 			yay[i] = atoi(ptr[i]);
 		} 
 		 sprintf(outBuffer,"R:%d G:%d B:%d St:%d Rb:%d\n\r",yay[0],yay[1],yay[2],yay[3],yay[4]);
-		//rgb(yay[0], yay[1], yay[2]);
-		 
+		 //rgb(yay[0], yay[1], yay[2]);
+		if(yay[0]!=old_color[1]&&yay[1]!=old_color[0]&&yay[2]!=old_color[2]){
+			//if(yay[0]!=tact_sw[1]||yay[1]!=tact_sw[0]||yay[2]!=tact_sw[2]){
+				rgb(yay[0], yay[1], yay[2]);
+			//}
+				
+		}
+		// Check On/Off
+		/*if(yay[3]==0){
+			old_color[0] =  tact_sw[0]; //G Channel
+			old_color[1] =  tact_sw[1]; //R Channel
+			old_color[2] =  tact_sw[2]; //B Channel				
+			rgb(0, 0, 0);
+		}
+		else{
+				rgb(old_color[1], old_color[0], old_color[2]);
+		}*/
+		
+		/*// Check On/Off
+		if(yay[3]==0){
+			old_color[0] =  tact_sw[0]; //G Channel
+			old_color[1] =  tact_sw[1]; //R Channel
+			old_color[2] =  tact_sw[2]; //B Channel				
+			rgb(0, 0, 0);
+		}
+		else{
+			if(yay[0]!=old_color[1]||yay[1]!=old_color[0]||yay[2]!=old_color[2]){
+				rgb(yay[0], yay[1], yay[2]);
+			}
+			else{
+				tact_sw[0]=old_color[0]; //G Channel
+				tact_sw[1]=old_color[1]; //R Channel
+				tact_sw[2]=old_color[2]; //B Channel	
+			}
+				
+			
+		}*/
 		HAL_UART_Transmit(&huart2,(uint8_t *) outBuffer,strlen(outBuffer),100);
+		//doRainbow();
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
