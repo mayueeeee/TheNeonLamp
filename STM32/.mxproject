@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/Dream/Desktop/TheNeonLamp-develop/STM32/Inc
+HeaderPath=C:/Users/Dream/Desktop/ComInerface/TheNeonLamp/STM32/Inc
 HeaderFiles=stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;
-SourcePath=C:/Users/Dream/Desktop/TheNeonLamp-develop/STM32/Src
+SourcePath=C:/Users/Dream/Desktop/ComInerface/TheNeonLamp/STM32/Src
 SourceFiles=stm32f1xx_it.c;stm32f1xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]

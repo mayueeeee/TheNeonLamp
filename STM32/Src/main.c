@@ -37,7 +37,8 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-
+#include "main.h"
+#include "stm32f1xx_hal.h"
 
 /* USER CODE BEGIN Includes */
 #include "main.h"
@@ -66,7 +67,6 @@ DMA_HandleTypeDef hdma_tim3_ch4_up;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
-UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -79,15 +79,14 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
-static void MX_USART3_UART_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM3_Init(void);
-void LCD_DrawFullCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
+static void MX_USART1_UART_Init(void);
+
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-   void rgb(int r,int g,int b);                             
+                                
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -106,12 +105,12 @@ int yay[5];
 void pushToUART(int r,int g,int b,int state, int random){
 	char send_data[20];
 	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,state,random);
-	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+	//HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
 }
 void pushColorToUART(int r,int g,int b){
 	char send_data[20];
 	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,yay[3],yay[4]);
-	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+	//HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
 }
 
 
@@ -151,12 +150,11 @@ uint16_t posX, posY;
   MX_DMA_Init();
   MX_SPI3_Init();
   MX_USART2_UART_Init();
-  MX_USART1_UART_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
-  MX_USART3_UART_Init();
   MX_TIM4_Init();
   MX_TIM3_Init();
+  MX_USART1_UART_Init();
 
   /* USER CODE BEGIN 2 */
 
@@ -398,9 +396,9 @@ uint16_t posX, posY;
 		
 		
 		
-		while(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_RXNE)==RESET){}
-		HAL_UART_Receive(&huart1, (uint8_t*) &str, 19, 10);		
-		HAL_UART_Transmit(&huart2,(uint8_t *) str,19,100);
+		while(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_RXNE)== RESET){}
+		HAL_UART_Receive(&huart1, (uint8_t*) &str, 19, 30);		
+		//HAL_UART_Transmit(&huart2,(uint8_t *) str,19,100);
 		//String to array
 		str[strlen(str) - 1] = '\0'; 
 		 ptr[0] = strtok(&str[1], ","); 
@@ -418,7 +416,7 @@ uint16_t posX, posY;
 		 sprintf(outBuffer,"R:%d G:%d B:%d St:%d Rb:%d\n\r",yay[0],yay[1],yay[2],yay[3],yay[4]);
 		//rgb(yay[0], yay[1], yay[2]);
 		 
-		//HAL_UART_Transmit(&huart2,(uint8_t *) outBuffer,strlen(outBuffer),100);
+		HAL_UART_Transmit(&huart2,(uint8_t *) outBuffer,strlen(outBuffer),100);
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -663,7 +661,7 @@ static void MX_USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -690,25 +688,6 @@ static void MX_USART2_UART_Init(void)
   huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart2.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
-/* USART3 init function */
-static void MX_USART3_UART_Init(void)
-{
-
-  huart3.Instance = USART3;
-  huart3.Init.BaudRate = 115200;
-  huart3.Init.WordLength = UART_WORDLENGTH_8B;
-  huart3.Init.StopBits = UART_STOPBITS_1;
-  huart3.Init.Parity = UART_PARITY_NONE;
-  huart3.Init.Mode = UART_MODE_TX_RX;
-  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart3) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -746,6 +725,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */

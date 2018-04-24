@@ -55,8 +55,7 @@ extern void rgb(int r,int g,int b);
 extern DMA_HandleTypeDef hdma_tim3_ch4_up;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim4;
+
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
