@@ -37,17 +37,16 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-#include "stm32f1xx_hal.h"
+
 
 /* USER CODE BEGIN Includes */
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "et_stm32f_arm_kit_lcd.h"
 #include <string.h>
-
+#include <stdlib.h>
 #define LED_COUNT		64
-#define LED_BUFFER_SIZE		24*64+	84		// Buffer size needs to be the number of LEDs times 24 bits plus 42 trailing bit to signify the end of the data being transmitted.
+#define LED_BUFFER_SIZE		24*LED_COUNT+84	// Buffer size needs to be the number of LEDs times 24 bits plus 42 trailing bit to signify the end of the data being transmitted.
 uint16_t led_buffer[LED_BUFFER_SIZE] = {0};
 uint16_t tact_sw[64]={0};
 
@@ -86,9 +85,9 @@ static void MX_TIM2_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM3_Init(void);
-
+void LCD_DrawFullCircle(uint16_t Xpos, uint16_t Ypos, uint16_t Radius);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                                
+   void rgb(int r,int g,int b);                             
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -96,12 +95,26 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
 void rgb(int r,int g,int b)
 {
 tact_sw[0]=g; //G Channel
 tact_sw[1]=r; //R Channel
 tact_sw[2]=b; //B Channel	
 }
+int yay[5];
+void pushToUART(int r,int g,int b,int state, int random){
+	char send_data[20];
+	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,state,random);
+	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+}
+void pushColorToUART(int r,int g,int b){
+	char send_data[20];
+	sprintf(send_data,"[%d,%d,%d,%d,%d]\n",r,g,b,yay[3],yay[4]);
+	HAL_UART_Transmit(&huart3,(uint8_t *) send_data,strlen(send_data),100);	
+}
+
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -111,6 +124,10 @@ int main(void)
 uint16_t posX, posY;
 	char pos[50];
 	int check = 1;
+		char str[20];
+	char outBuffer[100];
+	char* ptr[5];
+	int yay[5];
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -235,34 +252,35 @@ uint16_t posX, posY;
 			LCD_SetBackColor(0xf206);
 			LCD_DrawFullCircle(28, 292, 24);
 			rgb(244, 67, 54);
+			pushColorToUART(244, 67, 54);
 		}else if(posX >= 214 && posX <= 262 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 240, 24);
 			LCD_SetBackColor(0xe8ec);
 			LCD_DrawFullCircle(28, 240, 24);
 			rgb(233, 30, 99);
-
+			pushColorToUART(233, 30, 99);
 		}else if(posX >= 162 && posX <= 210 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 188, 24);
 			LCD_SetBackColor(0x9936);
 			LCD_DrawFullCircle(28, 188, 24);
 			rgb(156, 39, 176);
-			
+			pushColorToUART(156, 39, 176);
 		}else if(posX >= 110 && posX <= 158 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 136, 24);
 			LCD_SetBackColor(0x61d6);
 			LCD_DrawFullCircle(28, 136, 24);
 			rgb(103, 58, 183);
-			
+			pushColorToUART(103, 58, 183);
 		}else if(posX >= 58 && posX <= 106 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(28, 84, 24);
 			LCD_SetBackColor(0x3a96);
 			LCD_DrawFullCircle(28, 84, 24);
 			rgb(63, 81, 181);
-
+			pushColorToUART(63, 81, 181);
 			
 		}else if(posX >= 4 && posX <= 52 && posY >= 4 && posY <= 48){
 			LCD_SetBackColor(Black);
@@ -270,7 +288,7 @@ uint16_t posX, posY;
 			LCD_SetBackColor(0x24be);
 			LCD_DrawFullCircle(28, 32, 24);
 			rgb(33, 150, 243);
-			
+			pushColorToUART(33, 150, 243);
 		}
 		
 		//check touchscreen row 2
@@ -284,42 +302,42 @@ uint16_t posX, posY;
 			LCD_SetBackColor(0x055e);
 			LCD_DrawFullCircle(80, 292, 24);
 			rgb(3, 169, 244);
-			
+			pushColorToUART(3, 169, 244);
 		}else if(posX >= 214 && posX <= 262 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 240, 24);
 			LCD_SetBackColor(0x05fa);
 			LCD_DrawFullCircle(80, 240, 24);
 			rgb(0, 188, 212);
-			
+			pushColorToUART(0, 188, 212);
 		}else if(posX >= 162 && posX <= 210 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 188, 24);
 			LCD_SetBackColor(0x04b1);
 			LCD_DrawFullCircle(80, 188, 24);
 			rgb(0, 150, 136);
-			
+			pushColorToUART(0, 150, 136);
 		}else if(posX >= 110 && posX <= 158 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 136, 24);
 			LCD_SetBackColor(0x4d6a);
 			LCD_DrawFullCircle(80, 136, 24);
 			rgb(76, 175, 80);
-			
+			pushColorToUART(76, 175, 80);
 		}else if(posX >= 58 && posX <= 106 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 84, 24);
 			LCD_SetBackColor(0x8e09);
 			LCD_DrawFullCircle(80, 84, 24);
 			rgb(139, 195, 74);
-			
+			pushColorToUART(139, 195, 74);
 		}else if(posX >= 4 && posX <= 52 && posY >= 56 && posY <= 104){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(80, 32, 24);
 			LCD_SetBackColor(0xcee7);
 			LCD_DrawFullCircle(80, 32, 24);
 			rgb(205, 220, 57);
-			
+			pushColorToUART(205, 220, 57);
 		}
 		
 		posX = TCS_Read_X();
@@ -333,20 +351,21 @@ uint16_t posX, posY;
 			LCD_SetBackColor(0xff47);
 			LCD_DrawFullCircle(132, 292, 24);
 			rgb(255, 235, 59);
-			
+			pushColorToUART(255, 235, 59);
 		}else if(posX >= 214 && posX <= 262 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 240, 24);
 			LCD_SetBackColor(0xfe00);
 			LCD_DrawFullCircle(132, 240, 24);
 			rgb(255, 193, 7);
-			
+			pushColorToUART(255, 193, 7);
 		}else if(posX >= 162 && posX <= 210 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 188, 24);
 			LCD_SetBackColor(0xfcc0);
 			LCD_DrawFullCircle(132, 188, 24);
 			rgb(255, 152, 0);
+			pushColorToUART(255, 152, 0);
 			
 		}else if(posX >= 110 && posX <= 158 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
@@ -354,21 +373,21 @@ uint16_t posX, posY;
 			LCD_SetBackColor(0xfaa4);
 			LCD_DrawFullCircle(132, 136, 24);
 			rgb(255, 87, 34);
-			
+			pushColorToUART(255, 87, 34);
 		}else if(posX >= 58 && posX <= 106 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 84, 24);
 			LCD_SetBackColor(0x7aa9);
 			LCD_DrawFullCircle(132, 84, 24);
 			rgb(121, 85, 72);
-			
+			pushColorToUART(121, 85, 72);
 		}else if(posX >= 4 && posX <= 52 && posY >= 108 && posY <= 156){
 			LCD_SetBackColor(Black);
 			LCD_DrawFullCircle(132, 32, 24);
 			LCD_SetBackColor(0x63f1);
 			LCD_DrawFullCircle(132, 32, 24);
 			rgb(96, 125, 139);
-			
+			pushColorToUART(96,125,139);
 		}
 		
 		LCD_SetTextColor(Green);
@@ -376,6 +395,30 @@ uint16_t posX, posY;
 		LCD_SetTextColor(Yellow);
 		LCD_DisplayStringLine(Line8, "xxxxxxxRAINBOWxxxxxx");
 	
+		
+		
+		
+		while(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_RXNE)==RESET){}
+		HAL_UART_Receive(&huart1, (uint8_t*) &str, 19, 10);		
+		HAL_UART_Transmit(&huart2,(uint8_t *) str,19,100);
+		//String to array
+		str[strlen(str) - 1] = '\0'; 
+		 ptr[0] = strtok(&str[1], ","); 
+		 if (ptr[0] != NULL) { 
+			int i = 1; 
+			while (ptr[i - 1] != NULL) { 
+			 ptr[i] = strtok(NULL, ","); 
+			 i++; 
+			} 
+		 } 
+		 
+		for (int i = 0; i < 5; i++) { 
+			yay[i] = atoi(ptr[i]);
+		} 
+		 sprintf(outBuffer,"R:%d G:%d B:%d St:%d Rb:%d\n\r",yay[0],yay[1],yay[2],yay[3],yay[4]);
+		//rgb(yay[0], yay[1], yay[2]);
+		 
+		//HAL_UART_Transmit(&huart2,(uint8_t *) outBuffer,strlen(outBuffer),100);
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
