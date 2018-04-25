@@ -447,11 +447,18 @@ uint16_t posX, posY;
 			rgb(96, 125, 139);
 			pushColorToUART(96,125,139);
 		}
+		else if(posY >= 168 && posY <= 240){ 
+    //turn ON/OFF 
+			LCD_SetBackColor(0x000);
+			rgb(0, 0, 0);
+			pushColorToUART(0,0,0);
+		}
 		
+		
+		LCD_DisplayStringLine(Line7, "                    ");
 		LCD_SetTextColor(Green);
-		LCD_DisplayStringLine(Line7, "xxxxxTurnON/OFFxxxxx");
-		LCD_SetTextColor(Yellow);
-		LCD_DisplayStringLine(Line8, "xxxxxxxRAINBOWxxxxxx");
+		LCD_DisplayStringLine(Line8, "      TURN OFF      ");
+		LCD_DisplayStringLine(Line9, "                    ");
 	
 		
 		
@@ -475,6 +482,12 @@ uint16_t posX, posY;
 		} 
 		 sprintf(outBuffer,"R:%d G:%d B:%d St:%d Rb:%d\n\r",yay[0],yay[1],yay[2],yay[3],yay[4]);
 		 //rgb(yay[0], yay[1], yay[2]);
+		if(yay[0]==0&&yay[1]==0&&yay[2]==0){
+			
+				rgb(0, 0, 0);
+			
+				
+		}
 		if(yay[0]!=old_color[1]&&yay[1]!=old_color[0]&&yay[2]!=old_color[2]){
 			//if(yay[0]!=tact_sw[1]||yay[1]!=tact_sw[0]||yay[2]!=tact_sw[2]){
 				rgb(yay[0], yay[1], yay[2]);

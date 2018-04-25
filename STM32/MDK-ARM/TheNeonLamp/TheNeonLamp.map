@@ -469,8 +469,8 @@ Section Cross References
     main.o(i.main) refers to main.o(i.rgb) for rgb
     main.o(i.main) refers to main.o(i.pushColorToUART) for pushColorToUART
     main.o(i.main) refers to main.o(.bss) for .bss
-    main.o(i.main) refers to et_stm32f_arm_kit_lcd.o(i.LCD_SetTextColor) for LCD_SetTextColor
     main.o(i.main) refers to et_stm32f_arm_kit_lcd.o(i.LCD_DisplayStringLine) for LCD_DisplayStringLine
+    main.o(i.main) refers to et_stm32f_arm_kit_lcd.o(i.LCD_SetTextColor) for LCD_SetTextColor
     main.o(i.main) refers to stm32f1xx_hal_uart.o(i.HAL_UART_Receive) for HAL_UART_Receive
     main.o(i.main) refers to strlen.o(.text) for strlen
     main.o(i.main) refers to strtok.o(.text) for strtok
@@ -1554,14 +1554,14 @@ Image Symbol Table
     i._sputc                                 0x08003032   Section        0  printf6.o(i._sputc)
     _sputc                                   0x08003033   Thumb Code    10  printf6.o(i._sputc)
     i.main                                   0x0800303c   Section        0  main.o(i.main)
-    i.pushColorToUART                        0x08003878   Section        0  main.o(i.pushColorToUART)
-    i.rgb                                    0x080038dc   Section        0  main.o(i.rgb)
-    .constdata                               0x08003908   Section       16  system_stm32f1xx.o(.constdata)
-    .constdata                               0x08003918   Section        8  system_stm32f1xx.o(.constdata)
-    .constdata                               0x08003920   Section     4560  et_stm32f_arm_kit_lcd.o(.constdata)
-    .constdata                               0x08004af0   Section      129  ctype_o.o(.constdata)
-    .constdata                               0x08004b74   Section        4  ctype_o.o(.constdata)
-    table                                    0x08004b74   Data           4  ctype_o.o(.constdata)
+    i.pushColorToUART                        0x080038a8   Section        0  main.o(i.pushColorToUART)
+    i.rgb                                    0x0800390c   Section        0  main.o(i.rgb)
+    .constdata                               0x08003938   Section       16  system_stm32f1xx.o(.constdata)
+    .constdata                               0x08003948   Section        8  system_stm32f1xx.o(.constdata)
+    .constdata                               0x08003950   Section     4560  et_stm32f_arm_kit_lcd.o(.constdata)
+    .constdata                               0x08004b20   Section      129  ctype_o.o(.constdata)
+    .constdata                               0x08004ba4   Section        4  ctype_o.o(.constdata)
+    table                                    0x08004ba4   Data           4  ctype_o.o(.constdata)
     .data                                    0x20000000   Section        4  stm32f1xx_hal.o(.data)
     .data                                    0x20000004   Section        4  system_stm32f1xx.o(.data)
     .data                                    0x20000008   Section        4  main.o(.data)
@@ -1810,15 +1810,15 @@ Image Symbol Table
     __scatterload_copy                       0x08002cd1   Thumb Code    14  handlers.o(i.__scatterload_copy)
     __scatterload_null                       0x08002cdf   Thumb Code     2  handlers.o(i.__scatterload_null)
     __scatterload_zeroinit                   0x08002ce1   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
-    main                                     0x0800303d   Thumb Code  2018  main.o(i.main)
-    pushColorToUART                          0x08003879   Thumb Code    72  main.o(i.pushColorToUART)
-    rgb                                      0x080038dd   Thumb Code    34  main.o(i.rgb)
-    AHBPrescTable                            0x08003908   Data          16  system_stm32f1xx.o(.constdata)
-    APBPrescTable                            0x08003918   Data           8  system_stm32f1xx.o(.constdata)
-    ASCII_Table                              0x08003920   Data        4560  et_stm32f_arm_kit_lcd.o(.constdata)
-    __ctype_table                            0x08004af0   Data         129  ctype_o.o(.constdata)
-    Region$$Table$$Base                      0x08004b78   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x08004b98   Number         0  anon$$obj.o(Region$$Table)
+    main                                     0x0800303d   Thumb Code  2068  main.o(i.main)
+    pushColorToUART                          0x080038a9   Thumb Code    72  main.o(i.pushColorToUART)
+    rgb                                      0x0800390d   Thumb Code    34  main.o(i.rgb)
+    AHBPrescTable                            0x08003938   Data          16  system_stm32f1xx.o(.constdata)
+    APBPrescTable                            0x08003948   Data           8  system_stm32f1xx.o(.constdata)
+    ASCII_Table                              0x08003950   Data        4560  et_stm32f_arm_kit_lcd.o(.constdata)
+    __ctype_table                            0x08004b20   Data         129  ctype_o.o(.constdata)
+    Region$$Table$$Base                      0x08004ba8   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x08004bc8   Number         0  anon$$obj.o(Region$$Table)
     uwTick                                   0x20000000   Data           4  stm32f1xx_hal.o(.data)
     SystemCoreClock                          0x20000004   Data           4  system_stm32f1xx.o(.data)
     light_state                              0x20000008   Data           4  main.o(.data)
@@ -1846,9 +1846,9 @@ Memory Map of the image
 
   Image Entry point : 0x08000151
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00004bb0, Max: 0x00040000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00004be0, Max: 0x00040000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x00004b98, Max: 0x00040000, ABSOLUTE)
+    Execution Region ER_IROM1 (Base: 0x08000000, Size: 0x00004bc8, Max: 0x00040000, ABSOLUTE)
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -2000,16 +2000,16 @@ Memory Map of the image
     0x08002fe0   0x00000024   Code   RO         3232    i._printf_post_padding  mc_w.l(printf6.o)
     0x08003004   0x0000002e   Code   RO         3233    i._printf_pre_padding  mc_w.l(printf6.o)
     0x08003032   0x0000000a   Code   RO         3235    i._sputc            mc_w.l(printf6.o)
-    0x0800303c   0x0000083c   Code   RO         2712    i.main              main.o
-    0x08003878   0x00000064   Code   RO         2713    i.pushColorToUART   main.o
-    0x080038dc   0x0000002c   Code   RO         2715    i.rgb               main.o
-    0x08003908   0x00000010   Data   RO         2567    .constdata          system_stm32f1xx.o
-    0x08003918   0x00000008   Data   RO         2568    .constdata          system_stm32f1xx.o
-    0x08003920   0x000011d0   Data   RO         2899    .constdata          et_stm32f_arm_kit_lcd.o
-    0x08004af0   0x00000081   Data   RO         3381    .constdata          mc_w.l(ctype_o.o)
-    0x08004b71   0x00000003   PAD
-    0x08004b74   0x00000004   Data   RO         3382    .constdata          mc_w.l(ctype_o.o)
-    0x08004b78   0x00000020   Data   RO         3415    Region$$Table       anon$$obj.o
+    0x0800303c   0x0000086c   Code   RO         2712    i.main              main.o
+    0x080038a8   0x00000064   Code   RO         2713    i.pushColorToUART   main.o
+    0x0800390c   0x0000002c   Code   RO         2715    i.rgb               main.o
+    0x08003938   0x00000010   Data   RO         2567    .constdata          system_stm32f1xx.o
+    0x08003948   0x00000008   Data   RO         2568    .constdata          system_stm32f1xx.o
+    0x08003950   0x000011d0   Data   RO         2899    .constdata          et_stm32f_arm_kit_lcd.o
+    0x08004b20   0x00000081   Data   RO         3381    .constdata          mc_w.l(ctype_o.o)
+    0x08004ba1   0x00000003   PAD
+    0x08004ba4   0x00000004   Data   RO         3382    .constdata          mc_w.l(ctype_o.o)
+    0x08004ba8   0x00000020   Data   RO         3415    Region$$Table       anon$$obj.o
 
 
     Execution Region RW_IRAM1 (Base: 0x20000000, Size: 0x000013a8, Max: 0x00010000, ABSOLUTE)
@@ -2036,7 +2036,7 @@ Image component sizes
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
       1984        114       4560          4          0      13536   et_stm32f_arm_kit_lcd.o
-      3042        214          0          4       3980       9205   main.o
+      3090        212          0          4       3980       9249   main.o
         36          8        336          0       1024        772   startup_stm32f107xc.o
        132         22          0          4          0       3431   stm32f1xx_hal.o
        228         14          0          0          0      27097   stm32f1xx_hal_cortex.o
@@ -2053,7 +2053,7 @@ Image component sizes
         84         16         24          4          0       1067   system_stm32f1xx.o
 
     ----------------------------------------------------------------------
-     12822        780       4952         16       5008     748722   Object Totals
+     12870        778       4952         16       5008     748766   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         10          0          0          0          4          0   (incl. Padding)
 
@@ -2102,15 +2102,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     14264        820       5088         24       5008     743762   Grand Totals
-     14264        820       5088         24       5008     743762   ELF Image Totals
-     14264        820       5088         24          0          0   ROM Totals
+     14312        818       5088         24       5008     743806   Grand Totals
+     14312        818       5088         24       5008     743806   ELF Image Totals
+     14312        818       5088         24          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                19352 (  18.90kB)
+    Total RO  Size (Code + RO Data)                19400 (  18.95kB)
     Total RW  Size (RW Data + ZI Data)              5032 (   4.91kB)
-    Total ROM Size (Code + RO Data + RW Data)      19376 (  18.92kB)
+    Total ROM Size (Code + RO Data + RW Data)      19424 (  18.97kB)
 
 ==============================================================================
 
